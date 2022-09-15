@@ -3,6 +3,7 @@ import { UserOtpModel } from '../model/UserOtp.js';
 import bcrypt from 'bcryptjs';
 import Jwt from 'jsonwebtoken';
 
+/****** user sign up  ******/
 const signup = async (req, res) => {
   try {
     let name = req.body.name;
@@ -46,44 +47,70 @@ const signup = async (req, res) => {
   }
 };
 
+/****** user email vefify   ******/
 const verify = async (req, res) => {
   try {
     let otp = req.body.otp;
     let user_id = req.body.user_id;
 
-    // let userVerify = await UserOtpModel.findOne({
-    //   $and: [{ user_id }, { otp }],
-    // });
-
-    let userVerify = await UserOtpModel.findOne({ user_id }, (err, result) => {
-      console.log(!!err);
-      if (!!result) {
-        if (userVerify.otp == otp) {
-          res.status(200).send({
-            status: true,
-            msg: 'User verification successfully.',
-          });
-        } else {
-          res.status(400).send({
-            status: true,
-            msg: 'Otp not match.',
-          });
-        }
-      } else {
-        res.status(400).send({
-          status: true,
-          msg: 'User not found.',
-        });
-      }
+    let userVerify = await UserOtpModel.findOne({
+      $and: [{ user_id }, { otp }],
     });
+
+    if (!!userVerify) {
+      Jwt.sign({ user_id }, 'secretKey', (err, token) => {
+        res.status(200).send({
+          status: true,
+          msg: 'User verification successfully.',
+          data: { token },
+        });
+      });
+    } else {
+      res.status(400).send({ status: false, msg: 'Otp not match.' });
+    }
   } catch (e) {
-    res.status(500).send({ status: false, msg: e });
+    res.status(500).send({
+      status: false,
+      msg: e,
+    });
   }
 };
 
-const signin = (req, res) => {
+/****** user sign in ******/
+const signin = async (req, res) => {
   try {
-    res.status(200).json({ status: true, msg: 'Signin Route' });
+    let email = req.body.email;
+    let password = req.body.password;
+
+    let vefifyUser = await UserModel.findOne({ email });
+    if (!!vefifyUser) {
+      const vefifyPassword = await bcrypt.compare(
+        password,
+        vefifyUser.password
+      );
+      if (vefifyPassword) {
+        Jwt.sign({ email }, 'secretKey', (err, token) => {
+          if (!!err) {
+            res.status(400).json({
+              status: false,
+              msg: 'Something wrong. Please try again.',
+            });
+          } else {
+            res.status(200).send({
+              status: true,
+              msg: 'Sign in successfully.',
+              data: { user: vefifyUser, token },
+            });
+          }
+        });
+      } else {
+        res.status(400).json({
+          status: false,
+          msg: 'Password not match.',
+        });
+      }
+    } else {
+    }
   } catch (e) {
     res.status(500).json({ status: false, msg: e });
   }
