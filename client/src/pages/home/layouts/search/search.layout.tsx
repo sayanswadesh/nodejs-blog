@@ -4,14 +4,14 @@ const Search = () => {
 		<section>
 			<div className='container'>
 				<div className='prose py-16 mx-auto text-center'>
-					<h1 className='mb-0'>Node Js Blog</h1>
-					<p className='mt-0'>A blog about food, experiences, and recipes.</p>
-					<form className='relative max-w-xl mx-auto'>
+					<h1 className='mb-0'>Read, Learn, about exciting blogs.</h1>
+					<p className='mt-0'>A general blog about various topics.</p>
+					<form className='relative max-w-xl mx-auto mt-10'>
 						<input
 							type='text'
 							name='search'
 							id='search'
-							placeholder='Search articles...'
+							placeholder='Search blogs...'
 							className='border border-gray-300 h-14 py-3 pl-4 pr-16 rounded-md w-full'
 						/>
 						<button
